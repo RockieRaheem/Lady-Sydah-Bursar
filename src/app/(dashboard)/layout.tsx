@@ -60,16 +60,16 @@ export default function DashboardLayout({
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <Link href={item.href}>
+                  <Link href={item.href} passHref>
                     <SidebarMenuButton
                       asChild
                       isActive={pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard')}
                       tooltip={item.label}
                     >
-                      <>
+                      <span className="flex w-full items-center gap-2">
                         <item.icon />
                         <span>{item.label}</span>
-                      </>
+                      </span>
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
