@@ -24,7 +24,7 @@ export default function LoginPage() {
               <School className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <CardTitle className="font-headline text-2xl">Lady Sydah Bursar</CardTitle>
+          <CardTitle className="font-headline text-2xl">Lady Sydah Junior School</CardTitle>
           <CardDescription>Sign in to your account</CardDescription>
         </CardHeader>
         <CardContent>
