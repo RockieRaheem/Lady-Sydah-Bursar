@@ -1,3 +1,10 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "school-logo",
+      "description": "Lady Sydah Junior School logo",
+      "imageUrl": "https://picsum.photos/seed/sydah-logo/100/100",
+      "imageHint": "school logo"
+    }
+  ]
 }
