@@ -2,7 +2,7 @@
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { formatCurrency } from '@/lib/utils';
 import { DollarSign, Wallet, Activity } from 'lucide-react';
 
@@ -11,6 +11,13 @@ type FinancialSummaryProps = {
   totalExpenses: number;
   netBalance: number;
   classWiseIncome: { name: string; total: number }[];
+};
+
+const chartConfig = {
+  total: {
+    label: "Income",
+    color: "hsl(var(--primary))",
+  },
 };
 
 export function FinancialSummary({
@@ -55,31 +62,33 @@ export function FinancialSummary({
           <CardTitle>Class-wise Income Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={350}>
-            <BarChart data={classWiseIncome}>
-              <XAxis
-                dataKey="name"
-                stroke="#888888"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                stroke="#888888"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => `${formatCurrency(Number(value))}`}
-              />
-               <Tooltip
-                cursor={{ fill: 'hsl(var(--accent))', radius: 'var(--radius)' }}
-                content={<ChartTooltipContent
-                    formatter={(value) => formatCurrency(Number(value))}
-                    />}
+          <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={classWiseIncome}>
+                <XAxis
+                  dataKey="name"
+                  stroke="#888888"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
                 />
-              <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+                <YAxis
+                  stroke="#888888"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `${formatCurrency(Number(value))}`}
+                />
+                <Tooltip
+                  cursor={{ fill: 'hsl(var(--accent))', radius: 'var(--radius)' }}
+                  content={<ChartTooltipContent
+                      formatter={(value) => formatCurrency(Number(value))}
+                      />}
+                  />
+                <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartContainer>
         </CardContent>
       </Card>
     </div>
