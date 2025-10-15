@@ -79,7 +79,7 @@ export default function DashboardPage() {
             name={c.name}
             pupilCount={c.pupilCount}
             totalCollected={c.totalCollected}
-            href={`/dashboard/classes/${c.id}`}
+            href={`/classes/${c.id}`}
           />
         ))}
       </div>
