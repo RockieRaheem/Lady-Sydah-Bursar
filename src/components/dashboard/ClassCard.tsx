@@ -12,7 +12,7 @@ type ClassCardProps = {
 
 export function ClassCard({ name, pupilCount, totalCollected, href }: ClassCardProps) {
   return (
-    <Link href={href} legacyBehavior={false} className="group block h-full">
+    <Link href={href} className="group block h-full">
         <Card className="h-full transition-all duration-200 ease-in-out group-hover:border-primary group-hover:shadow-lg">
           <CardHeader>
             <div className="flex items-center justify-between">

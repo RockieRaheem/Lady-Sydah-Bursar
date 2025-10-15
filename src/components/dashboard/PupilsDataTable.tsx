@@ -63,7 +63,7 @@ export function PupilsDataTable({
               data.map((pupil) => (
                 <TableRow key={pupil.id}>
                   <TableCell className="font-medium">
-                     <Link href={`/dashboard/pupils/${pupil.id}`} legacyBehavior={false} className="hover:underline text-primary">
+                     <Link href={`/dashboard/pupils/${pupil.id}`} className="hover:underline text-primary">
                         {pupil.name}
                     </Link>
                   </TableCell>
