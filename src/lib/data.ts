@@ -118,3 +118,7 @@ export const getTotalIncome = () => {
 export const getTotalExpenses = () => {
     return expenses.reduce((sum, expense) => sum + expense.amount, 0);
 }
+
+export const getClassById = (classId: string) => {
+  return schoolClasses.find(c => c.id === classId);
+};
