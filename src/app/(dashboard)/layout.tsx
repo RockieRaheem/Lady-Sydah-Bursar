@@ -66,10 +66,10 @@ export default function DashboardLayout({
                       isActive={pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard')}
                       tooltip={item.label}
                     >
-                      <a>
+                      <span>
                         <item.icon />
                         <span>{item.label}</span>
-                      </a>
+                      </span>
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
