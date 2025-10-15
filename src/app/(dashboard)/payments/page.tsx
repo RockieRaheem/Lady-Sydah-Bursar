@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { PlusCircle, Search } from 'lucide-react';
+import { PlusCircle, Search, CalendarIcon } from 'lucide-react';
 import { PaymentsDataTable } from '@/components/dashboard/PaymentsDataTable';
 import {
   schoolClasses,
@@ -13,7 +13,7 @@ import {
 } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -24,6 +24,10 @@ import {
 } from '@/components/ui/select';
 import { Wallet } from 'lucide-react';
 import { AddEditPaymentDialog } from '@/components/dashboard/AddEditPaymentDialog';
+import { DateRange } from 'react-day-picker';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
 
 export type EnrichedPayment = Payment & {
   pupilName: string;
@@ -32,9 +36,12 @@ export type EnrichedPayment = Payment & {
 };
 
 export default function PaymentsPage() {
-  const [payments, setPayments] = React.useState<Payment[]>(allPayments);
+  const [payments, setPayments] = React.useState<Payment[]>(() =>
+    allPayments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  );
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedClass, setSelectedClass] = React.useState('all');
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedPayment, setSelectedPayment] = React.useState<EnrichedPayment | null>(null);
 
@@ -53,15 +60,29 @@ export default function PaymentsPage() {
 
   const filteredPayments = React.useMemo(() => {
     return enrichedPayments.filter((payment) => {
+      const paymentDate = new Date(payment.date);
+      paymentDate.setHours(0, 0, 0, 0);
+
+      const from = dateRange?.from;
+      if (from) from.setHours(0, 0, 0, 0);
+
+      const to = dateRange?.to;
+      if (to) to.setHours(0, 0, 0, 0);
+
       const matchesSearch = payment.pupilName.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesClass = selectedClass === 'all' || payment.classId === selectedClass;
-      return matchesSearch && matchesClass;
+      const matchesDate =
+        !dateRange ||
+        !dateRange.from ||
+        (paymentDate >= from! && (!dateRange.to || paymentDate <= to!));
+      
+      return matchesSearch && matchesClass && matchesDate;
     });
-  }, [enrichedPayments, searchTerm, selectedClass]);
+  }, [enrichedPayments, searchTerm, selectedClass, dateRange]);
   
   const totalIncome = React.useMemo(() => {
-      return payments.reduce((sum, payment) => sum + payment.amount, 0);
-  }, [payments]);
+      return filteredPayments.reduce((sum, payment) => sum + payment.amount, 0);
+  }, [filteredPayments]);
 
   const handleAddPayment = () => {
     setSelectedPayment(null);
@@ -84,7 +105,7 @@ export default function PaymentsPage() {
       );
     } else {
       const newPayment = { ...paymentData, id: `payment-${Date.now()}` };
-      setPayments((prev) => [newPayment, ...prev]);
+      setPayments((prev) => [newPayment, ...prev].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
     }
     setIsDialogOpen(false);
   };
@@ -106,7 +127,7 @@ export default function PaymentsPage() {
        <div className="grid gap-4 md:grid-cols-3">
         <Card className="md:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Income</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Filtered Income</CardTitle>
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -114,7 +135,7 @@ export default function PaymentsPage() {
               {formatCurrency(totalIncome)}
             </div>
             <p className="text-xs text-muted-foreground">
-              Total payments received
+              Total payments received in the selected period and filters
             </p>
           </CardContent>
         </Card>
@@ -134,6 +155,44 @@ export default function PaymentsPage() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
+              </div>
+              <div className="w-full sm:w-auto">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="date"
+                      variant={'outline'}
+                      className={cn(
+                        "w-full sm:w-[300px] justify-start text-left font-normal",
+                        !dateRange && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateRange?.from ? (
+                        dateRange.to ? (
+                          <>
+                            {format(dateRange.from, "LLL dd, y")} -{" "}
+                            {format(dateRange.to, "LLL dd, y")}
+                          </>
+                        ) : (
+                          format(dateRange.from, "LLL dd, y")
+                        )
+                      ) : (
+                        <span>Pick a date range</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      defaultMonth={dateRange?.from}
+                      selected={dateRange}
+                      onSelect={setDateRange}
+                      numberOfMonths={2}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="w-full sm:w-[200px]">
                 <Select value={selectedClass} onValueChange={setSelectedClass}>
