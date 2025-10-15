@@ -10,7 +10,7 @@ import { ArrowLeft, User, Phone, Wallet } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { EnrichedPayment } from '@/app/(dashboard)/payments/page';
+import { type EnrichedPayment } from '@/app/(dashboard)/dashboard/payments/page';
 
 type EnrichedPupil = Pupil & {
     className: string;

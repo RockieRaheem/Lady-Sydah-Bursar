@@ -29,10 +29,10 @@ import { GlobalStateProvider } from '@/lib/global-state';
 
 const menuItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/pupils', label: 'Pupils', icon: Users },
-  { href: '/payments', label: 'Payments', icon: CreditCard },
-  { href: '/expenses', label: 'Expenses', icon: Wallet },
-  { href: '/reports', label: 'Reports', icon: FileText },
+  { href: '/dashboard/pupils', label: 'Pupils', icon: Users },
+  { href: '/dashboard/payments', label: 'Payments', icon: CreditCard },
+  { href: '/dashboard/expenses', label: 'Expenses', icon: Wallet },
+  { href: '/dashboard/reports', label: 'Reports', icon: FileText },
 ];
 
 export default function DashboardLayout({
