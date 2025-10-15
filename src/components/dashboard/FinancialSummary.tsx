@@ -2,7 +2,7 @@
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { formatCurrency } from '@/lib/utils';
 import { DollarSign, Wallet, Activity } from 'lucide-react';
 
@@ -16,9 +16,9 @@ type FinancialSummaryProps = {
 const chartConfig = {
   total: {
     label: "Income",
-    color: "hsl(var(--primary))",
+    color: "hsl(var(--chart-1))",
   },
-};
+} satisfies ChartConfig;
 
 export function FinancialSummary({
   totalIncome,
@@ -85,7 +85,7 @@ export function FinancialSummary({
                       formatter={(value) => formatCurrency(Number(value))}
                       />}
                   />
-                <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="total" fill="var(--color-total)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>
