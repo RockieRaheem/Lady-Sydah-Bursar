@@ -3,14 +3,7 @@
 import * as React from 'react';
 import { PlusCircle, Search, CalendarIcon } from 'lucide-react';
 import { PaymentsDataTable } from '@/components/dashboard/PaymentsDataTable';
-import {
-  schoolClasses,
-  pupils,
-  payments as allPayments,
-  type Payment,
-  type Pupil,
-  type SchoolClass,
-} from '@/lib/data';
+import { type Payment, type Pupil, type SchoolClass } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -28,6 +21,7 @@ import { DateRange } from 'react-day-picker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
+import { useGlobalState } from '@/lib/global-state';
 
 export type EnrichedPayment = Payment & {
   pupilName: string;
@@ -36,9 +30,7 @@ export type EnrichedPayment = Payment & {
 };
 
 export default function PaymentsPage() {
-  const [payments, setPayments] = React.useState<Payment[]>(() =>
-    allPayments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-  );
+  const { payments, setPayments, pupils, schoolClasses, setPupils } = useGlobalState();
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedClass, setSelectedClass] = React.useState('all');
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>();
@@ -56,7 +48,7 @@ export default function PaymentsPage() {
         classId: schoolClass.id,
       };
     });
-  }, [payments]);
+  }, [payments, pupils, schoolClasses]);
 
   const filteredPayments = React.useMemo(() => {
     return enrichedPayments.filter((payment) => {
@@ -95,17 +87,45 @@ export default function PaymentsPage() {
   };
 
   const handleDeletePayment = (paymentId: string) => {
+     const paymentToDelete = payments.find(p => p.id === paymentId);
+    if (!paymentToDelete) return;
+
     setPayments((prev) => prev.filter((p) => p.id !== paymentId));
+    // Refund the amount to the pupil's balance
+    setPupils(prevPupils => prevPupils.map(p => 
+      p.id === paymentToDelete.pupilId 
+        ? { ...p, totalDue: p.totalDue + paymentToDelete.amount }
+        : p
+    ));
   };
 
   const handleDialogSave = (paymentData: Omit<Payment, 'id'> | Payment) => {
      if ('id' in paymentData) {
+      // Editing existing payment
+      const originalPayment = payments.find(p => p.id === paymentData.id);
+      const amountDifference = (originalPayment?.amount || 0) - paymentData.amount;
+      
       setPayments((prev) =>
         prev.map((p) => (p.id === paymentData.id ? paymentData : p))
       );
+
+      // Adjust pupil balance based on the difference
+      setPupils(prevPupils => prevPupils.map(p => 
+        p.id === paymentData.pupilId 
+          ? { ...p, totalDue: p.totalDue + amountDifference }
+          : p
+      ));
+
     } else {
+      // Adding new payment
       const newPayment = { ...paymentData, id: `payment-${Date.now()}` };
       setPayments((prev) => [newPayment, ...prev].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+       // Deduct payment from pupil's balance
+      setPupils(prevPupils => prevPupils.map(p => 
+        p.id === newPayment.pupilId 
+          ? { ...p, totalDue: p.totalDue - newPayment.amount }
+          : p
+      ));
     }
     setIsDialogOpen(false);
   };

@@ -1,21 +1,35 @@
+'use client';
+
+import * as React from 'react';
 import { FinancialSummary } from '@/components/dashboard/FinancialSummary';
 import { AiReport } from '@/components/dashboard/AiReport';
-import {
-  schoolClasses,
-  getTotalIncome,
-  getTotalExpenses,
-  getTotalCollectedByClass,
-} from '@/lib/data';
+import { useGlobalState } from '@/lib/global-state';
 
 export default function ReportsPage() {
-  const totalIncome = getTotalIncome();
-  const totalExpenses = getTotalExpenses();
+  const { payments, expenses, schoolClasses, pupils } = useGlobalState();
+  
+  const totalIncome = React.useMemo(() => {
+    return payments.reduce((sum, payment) => sum + payment.amount, 0);
+  }, [payments]);
+  
+  const totalExpenses = React.useMemo(() => {
+    return expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  }, [expenses]);
+  
   const netBalance = totalIncome - totalExpenses;
 
-  const classWiseIncomeData = schoolClasses.map((c) => ({
-    name: c.name,
-    total: getTotalCollectedByClass(c.id),
-  }));
+  const classWiseIncomeData = React.useMemo(() => {
+    return schoolClasses.map((c) => {
+      const classPupils = pupils.filter(p => p.classId === c.id);
+      const total = payments
+        .filter(p => classPupils.some(cp => cp.id === p.pupilId))
+        .reduce((sum, payment) => sum + payment.amount, 0);
+      return {
+        name: c.name,
+        total: total,
+      };
+    });
+  }, [schoolClasses, pupils, payments]);
 
   const aiInputData = {
     totalIncome,

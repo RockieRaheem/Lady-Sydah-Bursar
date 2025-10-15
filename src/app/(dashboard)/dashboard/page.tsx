@@ -1,22 +1,33 @@
-import {
-  schoolClasses,
-  getPupilCountByClass,
-  getTotalCollectedByClass,
-} from '@/lib/data';
+'use client';
+
+import * as React from 'react';
+import { useGlobalState } from '@/lib/global-state';
 import { ClassCard } from '@/components/dashboard/ClassCard';
 import { BookOpen, Users, DollarSign } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function DashboardPage() {
-  const classData = schoolClasses.map((c) => ({
-    ...c,
-    pupilCount: getPupilCountByClass(c.id),
-    totalCollected: getTotalCollectedByClass(c.id),
-  }));
+  const { schoolClasses, pupils, payments } = useGlobalState();
 
-  const totalPupils = classData.reduce((sum, c) => sum + c.pupilCount, 0);
-  const totalIncome = classData.reduce((sum, c) => sum + c.totalCollected, 0);
+  const classData = React.useMemo(() => {
+    return schoolClasses.map((c) => {
+      const classPupils = pupils.filter(p => p.classId === c.id);
+      const pupilCount = classPupils.length;
+      const totalCollected = payments
+        .filter(p => classPupils.some(cp => cp.id === p.pupilId))
+        .reduce((sum, payment) => sum + payment.amount, 0);
+
+      return {
+        ...c,
+        pupilCount,
+        totalCollected,
+      };
+    });
+  }, [schoolClasses, pupils, payments]);
+
+  const totalPupils = pupils.length;
+  const totalIncome = payments.reduce((sum, c) => sum + c.amount, 0);
 
 
   return (

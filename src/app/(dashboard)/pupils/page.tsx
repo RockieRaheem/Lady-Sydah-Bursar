@@ -2,11 +2,10 @@
 
 import * as React from 'react';
 import { UserPlus, Search } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PupilsDataTable } from '@/components/dashboard/PupilsDataTable';
-import { pupils as allPupils, type Pupil, schoolClasses } from '@/lib/data';
+import { type Pupil } from '@/lib/data';
 import { AddEditPupilDialog } from '@/components/dashboard/AddEditPupilDialog';
 import {
   Select,
@@ -16,16 +15,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { useGlobalState } from '@/lib/global-state';
 
 export default function PupilsPage() {
-  const [pupils, setPupils] = React.useState<Pupil[]>(allPupils);
-  const [filteredPupils, setFilteredPupils] = React.useState<Pupil[]>(allPupils);
+  const { pupils, setPupils, schoolClasses } = useGlobalState();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedPupil, setSelectedPupil] = React.useState<Pupil | null>(null);
   const [selectedClass, setSelectedClass] = React.useState<string>('all');
   const [searchTerm, setSearchTerm] = React.useState('');
 
-  React.useEffect(() => {
+  const filteredPupils = React.useMemo(() => {
     let filtered = pupils;
 
     if (selectedClass !== 'all') {
@@ -38,7 +37,7 @@ export default function PupilsPage() {
       );
     }
 
-    setFilteredPupils(filtered);
+    return filtered;
   }, [selectedClass, pupils, searchTerm]);
 
   const handleAddPupil = () => {
@@ -131,7 +130,7 @@ export default function PupilsPage() {
         onClose={() => setIsDialogOpen(false)}
         onSave={handleDialogSave}
         pupil={selectedPupil}
-        classId={selectedPupil?.classId || schoolClasses[0]?.id}
+        classId={selectedClass !== 'all' ? selectedClass : (selectedPupil?.classId || schoolClasses[0]?.id)}
       />
     </div>
   );

@@ -25,6 +25,7 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { UserNav } from '@/components/layout/UserNav';
+import { GlobalStateProvider } from '@/lib/global-state';
 
 const menuItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -42,51 +43,53 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader>
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <School className="h-5 w-5" />
+    <GlobalStateProvider>
+      <SidebarProvider>
+        <Sidebar>
+          <SidebarHeader>
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <School className="h-5 w-5" />
+              </div>
+              <span className="font-headline text-lg font-bold">
+                Lady Sydah
+              </span>
             </div>
-            <span className="font-headline text-lg font-bold">
-              Lady Sydah
-            </span>
-          </div>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            {menuItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === item.href}
-                  tooltip={item.label}
-                >
-                  <Link href={item.href}>
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter>
-          {/* Footer content if any */}
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 sm:pt-4">
-          <SidebarTrigger className="sm:hidden" />
-          <div className="ml-auto flex items-center gap-2">
-            <UserNav />
-          </div>
-        </header>
-        <main className="flex-1 overflow-auto p-4 sm:px-6">
-          {children}
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarMenu>
+              {menuItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.href}
+                    tooltip={item.label}
+                  >
+                    <Link href={item.href}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarContent>
+          <SidebarFooter>
+            {/* Footer content if any */}
+          </SidebarFooter>
+        </Sidebar>
+        <SidebarInset>
+          <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 sm:pt-4">
+            <SidebarTrigger className="sm:hidden" />
+            <div className="ml-auto flex items-center gap-2">
+              <UserNav />
+            </div>
+          </header>
+          <main className="flex-1 overflow-auto p-4 sm:px-6">
+            {children}
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </GlobalStateProvider>
   );
 }

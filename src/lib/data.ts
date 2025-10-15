@@ -1,3 +1,7 @@
+// This file contains the initial static data for the application.
+// In a real-world scenario, this data would likely come from a database or API.
+// For the purpose of this prototype, it is hardcoded here.
+
 export type SchoolClass = {
   id: string;
   name: string;
@@ -42,21 +46,21 @@ export const schoolClasses: SchoolClass[] = [
 ];
 
 export const pupils: Pupil[] = [
-  { id: 'pupil-1', name: 'Abeni Adebayo', classId: 'p3', guardianName: 'Mr. Adebayo', guardianContact: '123-456-7890', totalDue: 500000 },
-  { id: 'pupil-2', name: 'Baraka Chibuzo', classId: 'p3', guardianName: 'Ms. Chibuzo', guardianContact: '123-456-7891', totalDue: 500000 },
-  { id: 'pupil-3', name: 'Chidinma Diallo', classId: 'p5', guardianName: 'Mr. Diallo', guardianContact: '123-456-7892', totalDue: 600000 },
-  { id: 'pupil-4', name: 'Daren Ganga', classId: 'p5', guardianName: 'Mrs. Ganga', guardianContact: '123-456-7893', totalDue: 600000 },
-  { id: 'pupil-5', name: 'Emeka Okoro', classId: 'p1', guardianName: 'Mr. Okoro', guardianContact: '123-456-7894', totalDue: 450000 },
-  { id: 'pupil-6', name: 'Fatima Bello', classId: 'p1', guardianName: 'Ms. Bello', guardianContact: '123-456-7895', totalDue: 450000 },
-  { id: 'pupil-7', name: 'Gozie Obi', classId: 'p7', guardianName: 'Mr. Obi', guardianContact: '123-456-7896', totalDue: 700000 },
-  { id: 'pupil-8', name: 'Habiba Jalloh', classId: 'p7', guardianName: 'Mrs. Jalloh', guardianContact: '123-456-7897', totalDue: 700000 },
-  { id: 'pupil-9', name: 'Ikenna Eze', classId: 'baby', guardianName: 'Mr. Eze', guardianContact: '123-456-7898', totalDue: 300000 },
-  { id: 'pupil-10', name: 'Jabari Toure', classId: 'middle', guardianName: 'Ms. Toure', guardianContact: '123-456-7899', totalDue: 350000 },
-  { id: 'pupil-11', name: 'Kunto Kinte', classId: 'p2', guardianName: 'Mr. Kinte', guardianContact: '123-456-7900', totalDue: 450000 },
-  { id: 'pupil-12', name: 'Lulu Mbeki', classId: 'p4', guardianName: 'Ms. Mbeki', guardianContact: '123-456-7901', totalDue: 550000 },
-  { id: 'pupil-13', name: 'Musa Traore', classId: 'p6', guardianName: 'Mr. Traore', guardianContact: '123-456-7902', totalDue: 650000 },
-  { id: 'pupil-14', name: 'Nia Long', classId: 'top', guardianName: 'Ms. Long', guardianContact: '123-456-7903', totalDue: 400000 },
-  { id: 'pupil-15', name: 'Ode Tambo', classId: 'p3', guardianName: 'Mr. Tambo', guardianContact: '123-456-7904', totalDue: 500000 },
+  { id: 'pupil-1', name: 'Abeni Adebayo', classId: 'p3', guardianName: 'Mr. Adebayo', guardianContact: '123-456-7890', totalDue: 200000 },
+  { id: 'pupil-2', name: 'Baraka Chibuzo', classId: 'p3', guardianName: 'Ms. Chibuzo', guardianContact: '123-456-7891', totalDue: 0 },
+  { id: 'pupil-3', name: 'Chidinma Diallo', classId: 'p5', guardianName: 'Mr. Diallo', guardianContact: '123-456-7892', totalDue: 200000 },
+  { id: 'pupil-4', name: 'Daren Ganga', classId: 'p5', guardianName: 'Mrs. Ganga', guardianContact: '123-456-7893', totalDue: 0 },
+  { id: 'pupil-5', name: 'Emeka Okoro', classId: 'p1', guardianName: 'Mr. Okoro', guardianContact: '123-456-7894', totalDue: 0 },
+  { id: 'pupil-6', name: 'Fatima Bello', classId: 'p1', guardianName: 'Ms. Bello', guardianContact: '123-456-7895', totalDue: 250000 },
+  { id: 'pupil-7', name: 'Gozie Obi', classId: 'p7', guardianName: 'Mr. Obi', guardianContact: '123-456-7896', totalDue: 0 },
+  { id: 'pupil-8', name: 'Habiba Jalloh', classId: 'p7', guardianName: 'Mrs. Jalloh', guardianContact: '123-456-7897', totalDue: 350000 },
+  { id: 'pupil-9', name: 'Ikenna Eze', classId: 'baby', guardianName: 'Mr. Eze', guardianContact: '123-456-7898', totalDue: 0 },
+  { id: 'pupil-10', name: 'Jabari Toure', classId: 'middle', guardianName: 'Ms. Toure', guardianContact: '123-456-7899', totalDue: 0 },
+  { id: 'pupil-11', name: 'Kunto Kinte', classId: 'p2', guardianName: 'Mr. Kinte', guardianContact: '123-456-7900', totalDue: 0 },
+  { id: 'pupil-12', name: 'Lulu Mbeki', classId: 'p4', guardianName: 'Ms. Mbeki', guardianContact: '123-456-7901', totalDue: 0 },
+  { id: 'pupil-13', name: 'Musa Traore', classId: 'p6', guardianName: 'Mr. Traore', guardianContact: '123-456-7902', totalDue: 325000 },
+  { id: 'pupil-14', name: 'Nia Long', classId: 'top', guardianName: 'Ms. Long', guardianContact: '123-456-7903', totalDue: 0 },
+  { id: 'pupil-15', name: 'Ode Tambo', classId: 'p3', guardianName: 'Mr. Tambo', guardianContact: '123-456-7904', totalDue: 250000 },
 ];
 
 export const payments: Payment[] = [
@@ -86,39 +90,3 @@ export const expenses: Expense[] = [
   { id: 'expense-6', item: 'Internet Subscription', amount: 120000, date: '2024-05-12', notes: 'Monthly plan' },
   { id: 'expense-7', item: 'Playground Maintenance', amount: 200000, date: '2024-05-15', notes: 'Repairing swings' },
 ];
-
-// Helper functions to get derived data
-export const getPupilCountByClass = (classId: string) => {
-  return pupils.filter(p => p.classId === classId).length;
-};
-
-export const getPaymentsByPupil = (pupilId: string) => {
-  return payments.filter(p => p.pupilId === pupilId);
-}
-
-export const getTotalPaidByPupil = (pupilId: string) => {
-  return getPaymentsByPupil(pupilId).reduce((sum, payment) => sum + payment.amount, 0);
-};
-
-export const getPupilsByClass = (classId: string) => {
-  return pupils.filter(p => p.classId === classId);
-};
-
-export const getTotalCollectedByClass = (classId: string) => {
-  const classPupils = getPupilsByClass(classId);
-  return classPupils.reduce((classSum, pupil) => {
-    return classSum + getTotalPaidByPupil(pupil.id);
-  }, 0);
-};
-
-export const getTotalIncome = () => {
-    return payments.reduce((sum, payment) => sum + payment.amount, 0);
-}
-
-export const getTotalExpenses = () => {
-    return expenses.reduce((sum, expense) => sum + expense.amount, 0);
-}
-
-export const getClassById = (classId: string) => {
-  return schoolClasses.find(c => c.id === classId);
-};

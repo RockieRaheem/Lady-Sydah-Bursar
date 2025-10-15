@@ -6,26 +6,26 @@ import { UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PupilsDataTable } from '@/components/dashboard/PupilsDataTable';
-import { getClassById, getPupilsByClass, Pupil } from '@/lib/data';
+import { type Pupil } from '@/lib/data';
 import { AddEditPupilDialog } from '@/components/dashboard/AddEditPupilDialog';
+import { useGlobalState } from '@/lib/global-state';
 
 export default function ClassDetailsPage({
   params,
 }: {
-  params: Promise<{ classId: string }>;
+  params: { classId: string };
 }) {
-  const { classId } = React.use(params);
-  const [pupils, setPupils] = React.useState<Pupil[]>([]);
+  const { classId } = params;
+  const { pupils, setPupils, getClassById } = useGlobalState();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedPupil, setSelectedPupil] = React.useState<Pupil | null>(null);
 
   const schoolClass = getClassById(classId);
 
-  React.useEffect(() => {
-    if (schoolClass) {
-      setPupils(getPupilsByClass(schoolClass.id));
-    }
-  }, [schoolClass]);
+  const pupilsInClass = React.useMemo(() => {
+    return pupils.filter(p => p.classId === classId);
+  }, [pupils, classId]);
+
 
   if (!schoolClass) {
     notFound();
@@ -42,21 +42,15 @@ export default function ClassDetailsPage({
   };
 
   const handleDeletePupil = (pupilId: string) => {
-    // In a real app, you would have an API call here.
-    // For now, we just update the local state.
     setPupils((prev) => prev.filter((p) => p.id !== pupilId));
   };
   
   const handleDialogSave = (pupilData: Omit<Pupil, 'id'> | Pupil) => {
-    // In a real app, you would have an API call here.
-    // For now, we just update the local state.
     if ('id' in pupilData) {
-      // Editing existing pupil
       setPupils((prev) =>
         prev.map((p) => (p.id === pupilData.id ? pupilData : p))
       );
     } else {
-      // Adding new pupil
       const newPupil = { ...pupilData, id: `pupil-${Date.now()}` };
       setPupils((prev) => [...prev, newPupil]);
     }
@@ -86,7 +80,7 @@ export default function ClassDetailsPage({
         </CardHeader>
         <CardContent>
           <PupilsDataTable
-            data={pupils}
+            data={pupilsInClass}
             onEdit={handleEditPupil}
             onDelete={handleDeletePupil}
           />

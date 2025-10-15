@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ExpensesDataTable } from '@/components/dashboard/ExpensesDataTable';
-import { expenses as allExpenses, type Expense } from '@/lib/data';
+import { type Expense } from '@/lib/data';
 import { formatCurrency, cn } from '@/lib/utils';
 import { PlusCircle, Wallet, CalendarIcon } from 'lucide-react';
 import { AddEditExpenseDialog } from '@/components/dashboard/AddEditExpenseDialog';
@@ -12,11 +12,10 @@ import { DateRange } from 'react-day-picker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
+import { useGlobalState } from '@/lib/global-state';
 
 export default function ExpensesPage() {
-  const [expenses, setExpenses] = React.useState<Expense[]>(() =>
-    allExpenses.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-  );
+  const { expenses, setExpenses } = useGlobalState();
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedExpense, setSelectedExpense] = React.useState<Expense | null>(null);
