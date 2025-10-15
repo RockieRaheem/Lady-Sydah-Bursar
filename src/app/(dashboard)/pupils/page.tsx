@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Search } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 
 export default function PupilsPage() {
   const [pupils, setPupils] = React.useState<Pupil[]>(allPupils);
@@ -22,14 +23,23 @@ export default function PupilsPage() {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedPupil, setSelectedPupil] = React.useState<Pupil | null>(null);
   const [selectedClass, setSelectedClass] = React.useState<string>('all');
+  const [searchTerm, setSearchTerm] = React.useState('');
 
   React.useEffect(() => {
-    if (selectedClass === 'all') {
-      setFilteredPupils(pupils);
-    } else {
-      setFilteredPupils(pupils.filter((p) => p.classId === selectedClass));
+    let filtered = pupils;
+
+    if (selectedClass !== 'all') {
+      filtered = filtered.filter((p) => p.classId === selectedClass);
     }
-  }, [selectedClass, pupils]);
+
+    if (searchTerm) {
+      filtered = filtered.filter((p) =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredPupils(filtered);
+  }, [selectedClass, pupils, searchTerm]);
 
   const handleAddPupil = () => {
     setSelectedPupil(null);
@@ -76,22 +86,34 @@ export default function PupilsPage() {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>All Pupils</CardTitle>
-            <div className="w-[200px]">
-              <Select value={selectedClass} onValueChange={setSelectedClass}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by class..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Classes</SelectItem>
-                  {schoolClasses.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="relative w-full sm:w-auto">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search by name..."
+                  className="w-full rounded-lg bg-background pl-8 sm:w-[200px] lg:w-[250px]"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="w-full sm:w-[200px]">
+                <Select value={selectedClass} onValueChange={setSelectedClass}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by class..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Classes</SelectItem>
+                    {schoolClasses.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </CardHeader>
