@@ -15,8 +15,8 @@ export default function ClassDetailsPage({
 }: {
   params: { classId: string };
 }) {
-  const { classId } = params;
-  const { pupils, setPupils, getClassById } = useGlobalState();
+  const { classId } = React.use(params);
+  const { pupils, setPupils, getClassById, schoolClasses } = useGlobalState();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedPupil, setSelectedPupil] = React.useState<Pupil | null>(null);
 
@@ -28,7 +28,13 @@ export default function ClassDetailsPage({
 
 
   if (!schoolClass) {
-    notFound();
+    // To handle cases where the classId from URL is invalid
+    const isValidClass = schoolClasses.some(c => c.id === classId);
+    if (!isValidClass) {
+        notFound();
+    }
+    // If class exists but not yet loaded in state, show loading or wait.
+    return <div>Loading class details...</div>;
   }
 
   const handleAddPupil = () => {

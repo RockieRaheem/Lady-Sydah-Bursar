@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import {
   Table,
@@ -61,7 +62,11 @@ export function PupilsDataTable({
             {data.length ? (
               data.map((pupil) => (
                 <TableRow key={pupil.id}>
-                  <TableCell className="font-medium">{pupil.name}</TableCell>
+                  <TableCell className="font-medium">
+                     <Link href={`/dashboard/pupils/${pupil.id}`} className="hover:underline text-primary">
+                        {pupil.name}
+                    </Link>
+                  </TableCell>
                   <TableCell>{pupil.guardianName}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {pupil.guardianContact}
