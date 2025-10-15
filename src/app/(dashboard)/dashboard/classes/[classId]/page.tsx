@@ -12,13 +12,14 @@ import { AddEditPupilDialog } from '@/components/dashboard/AddEditPupilDialog';
 export default function ClassDetailsPage({
   params,
 }: {
-  params: { classId: string };
+  params: Promise<{ classId: string }>;
 }) {
+  const { classId } = React.use(params);
   const [pupils, setPupils] = React.useState<Pupil[]>([]);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedPupil, setSelectedPupil] = React.useState<Pupil | null>(null);
 
-  const schoolClass = getClassById(params.classId);
+  const schoolClass = getClassById(classId);
 
   React.useEffect(() => {
     if (schoolClass) {
