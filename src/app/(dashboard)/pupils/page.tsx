@@ -88,13 +88,13 @@ export default function PupilsPage() {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>All Pupils</CardTitle>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <div className="relative w-full sm:w-auto">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
                   placeholder="Search by name..."
-                  className="w-full rounded-lg bg-background pl-8 sm:w-[200px] lg:w-[250px]"
+                  className="w-full rounded-lg bg-background pl-8 sm:w-[250px] lg:w-[300px]"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
