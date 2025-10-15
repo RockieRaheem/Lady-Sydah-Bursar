@@ -18,7 +18,7 @@ export function middleware(request: NextRequest) {
   }
 
   if (isAuthenticated) {
-    if (isLoginPage) {
+    if (isLoginPage || pathname === '/') {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   }
