@@ -40,14 +40,14 @@ export default function PaymentsPage() {
   const enrichedPayments = React.useMemo(() => {
     return payments.map((payment) => {
       const pupil = pupils.find((p) => p.id === payment.pupilId) as Pupil;
-      const schoolClass = schoolClasses.find((c) => c.id === pupil.classId) as SchoolClass;
+      const schoolClass = schoolClasses.find((c) => c.id === pupil?.classId) as SchoolClass;
       return {
         ...payment,
-        pupilName: pupil.name,
-        className: schoolClass.name,
-        classId: schoolClass.id,
+        pupilName: pupil?.name,
+        className: schoolClass?.name,
+        classId: schoolClass?.id,
       };
-    });
+    }).filter(p => p.pupilName); // Filter out payments where pupil couldn't be found
   }, [payments, pupils, schoolClasses]);
 
   const filteredPayments = React.useMemo(() => {
