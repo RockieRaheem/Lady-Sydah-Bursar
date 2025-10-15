@@ -7,7 +7,6 @@ import {
   schoolClasses,
   pupils,
   payments as allPayments,
-  getTotalIncome,
   type Payment,
   type Pupil,
   type SchoolClass,
@@ -24,6 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Wallet } from 'lucide-react';
+import { AddEditPaymentDialog } from '@/components/dashboard/AddEditPaymentDialog';
 
 export type EnrichedPayment = Payment & {
   pupilName: string;
@@ -32,11 +32,14 @@ export type EnrichedPayment = Payment & {
 };
 
 export default function PaymentsPage() {
+  const [payments, setPayments] = React.useState<Payment[]>(allPayments);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedClass, setSelectedClass] = React.useState('all');
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [selectedPayment, setSelectedPayment] = React.useState<EnrichedPayment | null>(null);
 
   const enrichedPayments = React.useMemo(() => {
-    return allPayments.map((payment) => {
+    return payments.map((payment) => {
       const pupil = pupils.find((p) => p.id === payment.pupilId) as Pupil;
       const schoolClass = schoolClasses.find((c) => c.id === pupil.classId) as SchoolClass;
       return {
@@ -46,7 +49,7 @@ export default function PaymentsPage() {
         classId: schoolClass.id,
       };
     });
-  }, []);
+  }, [payments]);
 
   const filteredPayments = React.useMemo(() => {
     return enrichedPayments.filter((payment) => {
@@ -56,7 +59,36 @@ export default function PaymentsPage() {
     });
   }, [enrichedPayments, searchTerm, selectedClass]);
   
-  const totalIncome = getTotalIncome();
+  const totalIncome = React.useMemo(() => {
+      return payments.reduce((sum, payment) => sum + payment.amount, 0);
+  }, [payments]);
+
+  const handleAddPayment = () => {
+    setSelectedPayment(null);
+    setIsDialogOpen(true);
+  };
+
+  const handleEditPayment = (payment: EnrichedPayment) => {
+    setSelectedPayment(payment);
+    setIsDialogOpen(true);
+  };
+
+  const handleDeletePayment = (paymentId: string) => {
+    setPayments((prev) => prev.filter((p) => p.id !== paymentId));
+  };
+
+  const handleDialogSave = (paymentData: Omit<Payment, 'id'> | Payment) => {
+     if ('id' in paymentData) {
+      setPayments((prev) =>
+        prev.map((p) => (p.id === paymentData.id ? paymentData : p))
+      );
+    } else {
+      const newPayment = { ...paymentData, id: `payment-${Date.now()}` };
+      setPayments((prev) => [newPayment, ...prev]);
+    }
+    setIsDialogOpen(false);
+  };
+
 
   return (
     <div className="flex flex-col gap-6">
@@ -65,7 +97,7 @@ export default function PaymentsPage() {
           <h1 className="font-headline text-3xl font-bold tracking-tight">Payments</h1>
           <p className="text-muted-foreground">View and manage all pupil payments.</p>
         </div>
-        <Button>
+        <Button onClick={handleAddPayment}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Payment
         </Button>
@@ -122,9 +154,20 @@ export default function PaymentsPage() {
           </div>
         </CardHeader>
         <CardContent>
-            <PaymentsDataTable data={filteredPayments} />
+            <PaymentsDataTable 
+              data={filteredPayments}
+              onEdit={handleEditPayment}
+              onDelete={handleDeletePayment}
+            />
         </CardContent>
       </Card>
+
+      <AddEditPaymentDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onSave={handleDialogSave}
+        payment={selectedPayment}
+      />
     </div>
   );
 }

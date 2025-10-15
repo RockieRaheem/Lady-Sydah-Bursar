@@ -33,10 +33,14 @@ import { type EnrichedPayment } from '@/app/(dashboard)/payments/page';
 
 type PaymentsDataTableProps = {
   data: EnrichedPayment[];
+  onEdit: (payment: EnrichedPayment) => void;
+  onDelete: (paymentId: string) => void;
 };
 
 export function PaymentsDataTable({
   data,
+  onEdit,
+  onDelete,
 }: PaymentsDataTableProps) {
   const [deleteTarget, setDeleteTarget] = React.useState<EnrichedPayment | null>(null);
 
@@ -96,7 +100,7 @@ export function PaymentsDataTable({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => alert('Editing is not implemented yet.')}>
+                        <DropdownMenuItem onClick={() => onEdit(payment)}>
                           <Pencil className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
@@ -141,8 +145,8 @@ export function PaymentsDataTable({
               className="bg-destructive hover:bg-destructive/90"
               onClick={() => {
                 if (deleteTarget) {
-                    alert('Deleting is not implemented yet.');
-                    setDeleteTarge(null);
+                    onDelete(deleteTarget.id);
+                    setDeleteTarget(null);
                 }
               }}
             >
