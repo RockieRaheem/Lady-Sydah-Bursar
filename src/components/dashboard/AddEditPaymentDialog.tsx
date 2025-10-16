@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { CalendarIcon } from 'lucide-react';
+import * as React from "react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CalendarIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogFooter,
   DialogDescription,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -20,30 +20,38 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { type Payment, pupils } from '@/lib/data';
-import { type EnrichedPayment } from '@/app/(dashboard)/payments/page';
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { type Payment, pupils } from "@/lib/data";
+import { type EnrichedPayment } from "@/app/(dashboard)/payments/page";
 
-const paymentTypes = ['Tuition', 'Lunch', 'Uniform', 'Other'] as const;
+const paymentTypes = ["Fees", "Lunch", "Uniform", "Other"] as const;
 
 const formSchema = z.object({
-  pupilId: z.string().min(1, 'A pupil is required.'),
-  amount: z.coerce.number().min(1, 'Amount must be greater than 0.'),
-  date: z.date({ required_error: 'A date is required.' }),
+  pupilId: z.string().min(1, "A pupil is required."),
+  amount: z.coerce.number().min(1, "Amount must be greater than 0."),
+  date: z.date({ required_error: "A date is required." }),
   type: z.enum(paymentTypes),
+  paymentMethod: z
+    .enum(["Cash", "Mobile Money", "Bank Transfer", "Cheque"])
+    .optional(),
+  notes: z.string().optional(),
 });
 
 type PaymentFormValues = z.infer<typeof formSchema>;
@@ -51,7 +59,7 @@ type PaymentFormValues = z.infer<typeof formSchema>;
 type AddEditPaymentDialogProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: Omit<Payment, 'id'> | Payment) => void;
+  onSave: (data: Omit<Payment, "id"> | Payment) => void;
   payment: EnrichedPayment | null;
 };
 
@@ -65,7 +73,9 @@ export function AddEditPaymentDialog({
     resolver: zodResolver(formSchema),
     defaultValues: {
       amount: 0,
-      type: 'Tuition',
+      type: "Fees",
+      paymentMethod: "Cash",
+      notes: "",
     },
   });
 
@@ -76,13 +86,17 @@ export function AddEditPaymentDialog({
         amount: payment.amount,
         date: new Date(payment.date),
         type: payment.type,
+        paymentMethod: payment.paymentMethod || "Cash",
+        notes: payment.notes || "",
       });
     } else if (isOpen) {
       form.reset({
-        pupilId: '',
+        pupilId: "",
         amount: 0,
         date: new Date(),
-        type: 'Tuition',
+        type: "Fees",
+        paymentMethod: "Cash",
+        notes: "",
       });
     }
   }, [isOpen, payment, form]);
@@ -90,7 +104,7 @@ export function AddEditPaymentDialog({
   const onSubmit = (data: PaymentFormValues) => {
     const dataToSave = {
       ...data,
-      date: data.date.toISOString().split('T')[0], // format to YYYY-MM-DD
+      date: data.date.toISOString().split("T")[0], // format to YYYY-MM-DD
     };
     if (payment) {
       onSave({ ...payment, ...dataToSave });
@@ -99,10 +113,10 @@ export function AddEditPaymentDialog({
     }
   };
 
-  const dialogTitle = payment ? 'Edit Payment' : 'Add New Payment';
+  const dialogTitle = payment ? "Edit Payment" : "Add New Payment";
   const dialogDescription = payment
-    ? 'Update the payment details below.'
-    : 'Enter the details for the new payment.';
+    ? "Update the payment details below."
+    : "Enter the details for the new payment.";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -112,14 +126,20 @@ export function AddEditPaymentDialog({
           <DialogDescription>{dialogDescription}</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 py-4"
+          >
             <FormField
               control={form.control}
               name="pupilId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Pupil</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a pupil" />
@@ -156,7 +176,10 @@ export function AddEditPaymentDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Payment Type</FormLabel>
-                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select payment type" />
@@ -176,6 +199,44 @@ export function AddEditPaymentDialog({
             />
             <FormField
               control={form.control}
+              name="paymentMethod"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Payment Method</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select payment method" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Cash">Cash</SelectItem>
+                      <SelectItem value="Mobile Money">Mobile Money</SelectItem>
+                      <SelectItem value="Bank Transfer">
+                        Bank Transfer
+                      </SelectItem>
+                      <SelectItem value="Cheque">Cheque</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Additional notes..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
@@ -184,14 +245,14 @@ export function AddEditPaymentDialog({
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
-                          variant={'outline'}
+                          variant={"outline"}
                           className={cn(
-                            'w-full pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground'
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
                           )}
                         >
                           {field.value ? (
-                            format(field.value, 'PPP')
+                            format(field.value, "PPP")
                           ) : (
                             <span>Pick a date</span>
                           )}
@@ -205,7 +266,7 @@ export function AddEditPaymentDialog({
                         selected={field.value}
                         onSelect={field.onChange}
                         disabled={(date) =>
-                          date > new Date() || date < new Date('1900-01-01')
+                          date > new Date() || date < new Date("1900-01-01")
                         }
                         initialFocus
                       />
