@@ -3,10 +3,10 @@
 import * as React from 'react';
 import { notFound, useRouter } from 'next/navigation';
 import { useGlobalState } from '@/lib/global-state';
-import { type Payment, type Pupil } from '@/lib/data';
+import { type Payment, type Pupil, calculateExpectedFee, getPaymentStatus } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Phone, Wallet } from 'lucide-react';
+import { ArrowLeft, User, Phone, Wallet, Gift, DollarSign } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -14,12 +14,13 @@ import { type EnrichedPayment } from '@/app/(dashboard)/dashboard/payments/page'
 
 type EnrichedPupil = Pupil & {
     className: string;
+    expectedFee: number;
 };
 
 export default function PupilDetailsPage({ params }: { params: { pupilId: string } }) {
   const router = useRouter();
   const { pupilId } = params;
-  const { pupils, payments, getClassById } = useGlobalState();
+  const { pupils, payments, getClassById, schoolClasses } = useGlobalState();
 
   const [pupil, setPupil] = React.useState<EnrichedPupil | null>(null);
   const [pupilPayments, setPupilPayments] = React.useState<EnrichedPayment[]>([]);
@@ -28,7 +29,8 @@ export default function PupilDetailsPage({ params }: { params: { pupilId: string
     const foundPupil = pupils.find(p => p.id === pupilId);
     if (foundPupil) {
         const schoolClass = getClassById(foundPupil.classId);
-        setPupil({ ...foundPupil, className: schoolClass?.name || 'N/A' });
+        const expectedFee = schoolClass ? calculateExpectedFee(foundPupil, schoolClass) : 0;
+        setPupil({ ...foundPupil, className: schoolClass?.name || 'N/A', expectedFee });
 
         const relatedPayments = payments
             .filter(p => p.pupilId === pupilId)
@@ -37,10 +39,11 @@ export default function PupilDetailsPage({ params }: { params: { pupilId: string
                 pupilName: foundPupil.name,
                 className: schoolClass?.name || 'N/A',
                 classId: foundPupil.classId,
-            }));
+            }))
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         setPupilPayments(relatedPayments);
     }
-  }, [pupilId, pupils, payments, getClassById]);
+  }, [pupilId, pupils, payments, getClassById, schoolClasses]);
 
   if (!pupil) {
     // Gracefully handle the case where the pupil might not be found immediately
@@ -68,6 +71,9 @@ export default function PupilDetailsPage({ params }: { params: { pupilId: string
         return 'destructive';
     }
   };
+  
+  const paymentStatus = getPaymentStatus(pupil);
+  const statusColor = paymentStatus === 'Paid' ? 'text-green-600' : paymentStatus === 'Pending' ? 'text-destructive' : 'text-orange-600';
 
   return (
     <div className="flex flex-col gap-6">
@@ -86,22 +92,66 @@ export default function PupilDetailsPage({ params }: { params: { pupilId: string
         </div>
       </div>
 
+      <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Expected Fee</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatCurrency(pupil.expectedFee)}</div>
+              {pupil.bursaryType !== 'None' && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                  <Gift className="h-3 w-3 text-green-600" />
+                  {pupil.bursaryPercentage}% bursary applied
+                </p>
+              )}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Paid</CardTitle>
+              <Wallet className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{formatCurrency(pupil.totalPaid)}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {pupilPayments.length} payment{pupilPayments.length !== 1 ? 's' : ''}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Balance</CardTitle>
+              <Wallet className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${pupil.balance > 0 ? 'text-destructive' : 'text-green-600'}`}>
+                {formatCurrency(pupil.balance)}
+              </div>
+              <p className={`text-xs ${statusColor} mt-1 font-medium`}>
+                {paymentStatus}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Class</CardTitle>
+              <User className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{pupil.className}</div>
+            </CardContent>
+          </Card>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Pupil Information</CardTitle>
         </CardHeader>
         <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                        <User className="h-5 w-5 text-muted-foreground"/>
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Class</p>
-                        <p className="font-medium">{pupil.className}</p>
-                    </div>
-                </div>
-                 <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
                         <User className="h-5 w-5 text-muted-foreground"/>
                     </div>
@@ -119,15 +169,30 @@ export default function PupilDetailsPage({ params }: { params: { pupilId: string
                         <p className="font-medium">{pupil.guardianContact}</p>
                     </div>
                 </div>
-                 <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                        <Wallet className="h-5 w-5 text-muted-foreground"/>
+                {pupil.bursaryType !== 'None' && (
+                  <>
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
+                            <Gift className="h-5 w-5 text-green-600"/>
+                        </div>
+                        <div>
+                            <p className="text-sm text-muted-foreground">Bursary Type</p>
+                            <p className="font-medium">{pupil.bursaryType} ({pupil.bursaryPercentage}%)</p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Balance Due</p>
-                        <p className="font-medium">{formatCurrency(pupil.totalDue)}</p>
-                    </div>
-                </div>
+                    {pupil.bursaryReason && (
+                      <div className="flex items-center gap-3 sm:col-span-2">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
+                              <Gift className="h-5 w-5 text-green-600"/>
+                          </div>
+                          <div>
+                              <p className="text-sm text-muted-foreground">Bursary Reason</p>
+                              <p className="font-medium">{pupil.bursaryReason}</p>
+                          </div>
+                      </div>
+                    )}
+                  </>
+                )}
             </div>
         </CardContent>
       </Card>

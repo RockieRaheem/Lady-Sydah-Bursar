@@ -94,7 +94,7 @@ export default function PaymentsPage() {
     // Refund the amount to the pupil's balance
     setPupils(prevPupils => prevPupils.map(p => 
       p.id === paymentToDelete.pupilId 
-        ? { ...p, totalDue: p.totalDue + paymentToDelete.amount }
+        ? { ...p, totalPaid: p.totalPaid - paymentToDelete.amount, balance: p.balance + paymentToDelete.amount }
         : p
     ));
   };
@@ -103,7 +103,7 @@ export default function PaymentsPage() {
      if ('id' in paymentData) {
       // Editing existing payment
       const originalPayment = payments.find(p => p.id === paymentData.id);
-      const amountDifference = (originalPayment?.amount || 0) - paymentData.amount;
+      const amountDifference = paymentData.amount - (originalPayment?.amount || 0);
       
       setPayments((prev) =>
         prev.map((p) => (p.id === paymentData.id ? paymentData : p))
@@ -112,18 +112,19 @@ export default function PaymentsPage() {
       // Adjust pupil balance based on the difference
       setPupils(prevPupils => prevPupils.map(p => 
         p.id === paymentData.pupilId 
-          ? { ...p, totalDue: p.totalDue + amountDifference }
+          ? { ...p, totalPaid: p.totalPaid + amountDifference, balance: p.balance - amountDifference }
           : p
       ));
 
     } else {
       // Adding new payment
-      const newPayment = { ...paymentData, id: `payment-${Date.now()}` };
+      const receiptNumber = `RCP-${new Date().getFullYear()}-${String(payments.length + 1).padStart(3, '0')}`;
+      const newPayment = { ...paymentData, id: `payment-${Date.now()}`, receiptNumber };
       setPayments((prev) => [newPayment, ...prev].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
        // Deduct payment from pupil's balance
       setPupils(prevPupils => prevPupils.map(p => 
         p.id === newPayment.pupilId 
-          ? { ...p, totalDue: p.totalDue - newPayment.amount }
+          ? { ...p, totalPaid: p.totalPaid + newPayment.amount, balance: p.balance - newPayment.amount }
           : p
       ));
     }
