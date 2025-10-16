@@ -1,18 +1,27 @@
 /**
  * Firebase Data Migration Utility
- * 
+ *
  * This script migrates data from in-memory state to Firebase Firestore
  * Run this once to populate your Firebase database with initial data
  */
 
 import {
-  addPupil,
-  addPayment,
-  addExpense,
   addClass,
   logAuditAction,
-} from './firestore';
-import { schoolClasses, pupils, payments, expenses } from '../data';
+  initializeSchoolClasses,
+  bulkImportPupils,
+  bulkImportPayments,
+} from "./firestore";
+import { db } from "./config";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  Timestamp,
+  writeBatch,
+} from "firebase/firestore";
+import { schoolClasses, pupils, payments, expenses } from "../data";
+import type { Expense } from "../data";
 
 export async function migrateDataToFirestore(userId: string) {
   const results = {
@@ -23,73 +32,74 @@ export async function migrateDataToFirestore(userId: string) {
     errors: [] as string[],
   };
 
-  console.log('🚀 Starting Firebase data migration...');
+  console.log("🚀 Starting Firebase data migration...");
 
   try {
     // 1. Migrate School Classes
-    console.log('📚 Migrating school classes...');
-    for (const schoolClass of schoolClasses) {
-      try {
-        await addClass(schoolClass, userId);
-        results.classes++;
-      } catch (error) {
-        results.errors.push(`Class ${schoolClass.name}: ${error}`);
-      }
+    console.log("📚 Migrating school classes...");
+    try {
+      await initializeSchoolClasses(schoolClasses);
+      results.classes = schoolClasses.length;
+    } catch (error) {
+      results.errors.push(`Classes migration: ${error}`);
     }
 
     // 2. Migrate Pupils
-    console.log('👨‍🎓 Migrating pupils...');
-    for (const pupil of pupils) {
-      try {
-        await addPupil(pupil, userId);
-        results.pupils++;
-      } catch (error) {
-        results.errors.push(`Pupil ${pupil.name}: ${error}`);
-      }
+    console.log("👨‍🎓 Migrating pupils...");
+    try {
+      await bulkImportPupils(pupils);
+      results.pupils = pupils.length;
+    } catch (error) {
+      results.errors.push(`Pupils migration: ${error}`);
     }
 
     // 3. Migrate Payments
-    console.log('💰 Migrating payments...');
-    for (const payment of payments) {
-      try {
-        await addPayment(payment, userId);
-        results.payments++;
-      } catch (error) {
-        results.errors.push(`Payment ${payment.id}: ${error}`);
-      }
+    console.log("💰 Migrating payments...");
+    try {
+      await bulkImportPayments(payments);
+      results.payments = payments.length;
+    } catch (error) {
+      results.errors.push(`Payments migration: ${error}`);
     }
 
     // 4. Migrate Expenses
-    console.log('📊 Migrating expenses...');
-    for (const expense of expenses) {
-      try {
-        await addExpense(expense, userId);
-        results.expenses++;
-      } catch (error) {
-        results.errors.push(`Expense ${expense.id}: ${error}`);
-      }
+    console.log("📊 Migrating expenses...");
+    try {
+      const batch = writeBatch(db);
+      expenses.forEach((expense) => {
+        const docRef = collection(db, "expenses");
+        batch.set(docRef as any, {
+          ...expense,
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
+        });
+      });
+      await batch.commit();
+      results.expenses = expenses.length;
+    } catch (error) {
+      results.errors.push(`Expenses migration: ${error}`);
     }
 
     // Log migration completion
-    await logAuditAction(userId, 'DATA_MIGRATION', 'system', 'migration-complete', {
+    await logAuditAction("CREATE", "PUPIL", "migration-complete", null, {
       results,
       timestamp: new Date().toISOString(),
     });
 
-    console.log('✅ Migration completed!');
+    console.log("✅ Migration completed!");
     console.log(`   - Classes: ${results.classes}`);
     console.log(`   - Pupils: ${results.pupils}`);
     console.log(`   - Payments: ${results.payments}`);
     console.log(`   - Expenses: ${results.expenses}`);
-    
+
     if (results.errors.length > 0) {
       console.log(`⚠️  Errors: ${results.errors.length}`);
-      results.errors.forEach(err => console.log(`   - ${err}`));
+      results.errors.forEach((err) => console.log(`   - ${err}`));
     }
 
     return results;
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    console.error("❌ Migration failed:", error);
     throw error;
   }
 }
@@ -99,14 +109,11 @@ export async function migrateDataToFirestore(userId: string) {
  * Returns true if Firestore is empty
  */
 export async function isMigrationNeeded(): Promise<boolean> {
-  const { collection, getDocs } = await import('firebase/firestore');
-  const { db } = await import('./config');
-  
   try {
-    const pupilsSnapshot = await getDocs(collection(db, 'pupils'));
+    const pupilsSnapshot = await getDocs(collection(db, "pupils"));
     return pupilsSnapshot.empty;
   } catch (error) {
-    console.error('Error checking migration status:', error);
+    console.error("Error checking migration status:", error);
     return true;
   }
 }

@@ -171,3 +171,6 @@ function getAuthErrorMessage(errorCode: string): string {
       return "Authentication failed. Please try again";
   }
 }
+
+// Alias for backward compatibility
+export const loginUser = signInWithEmail;

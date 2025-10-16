@@ -1,9 +1,7 @@
 "use client";
-
-import Image from "next/image";
-import { useSearchParams } from "next/navigation";
-import { AlertTriangle, School } from "lucide-react";
-
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { School, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,13 +12,29 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { handleLogin } from "@/lib/actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
+import { loginUser } from "@/lib/firebase/auth";
 export default function LoginPage() {
-  const searchParams = useSearchParams();
-  const error = searchParams.get("error");
-
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    try {
+      await loginUser(email, password);
+      router.push("/dashboard");
+    } catch (err: any) {
+      console.error("Login error:", err);
+      setError(err.message || "Invalid credentials");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm">
@@ -33,18 +47,20 @@ export default function LoginPage() {
           <CardTitle className="font-headline text-2xl">
             Lady Sydah Junior School
           </CardTitle>
-          <CardDescription>Sign in to your account</CardDescription>
+          <CardDescription>Sign in to the bursary system</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={handleLogin} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder="bursar@ladysydah.com"
                 required
+                disabled={loading}
+                autoComplete="email"
               />
             </div>
             <div className="space-y-2">
@@ -53,8 +69,10 @@ export default function LoginPage() {
                 id="password"
                 name="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Enter password"
                 required
+                disabled={loading}
+                autoComplete="current-password"
               />
             </div>
             {error && (
@@ -64,10 +82,20 @@ export default function LoginPage() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit" className="w-full">
-              Login
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign in"
+              )}
             </Button>
           </form>
+          <div className="mt-4 text-center text-sm text-muted-foreground">
+            <p>🔒 Secured with Firebase</p>
+          </div>
         </CardContent>
       </Card>
     </div>

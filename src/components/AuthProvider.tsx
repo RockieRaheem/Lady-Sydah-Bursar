@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase/config";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
@@ -14,10 +14,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setAuthenticated(!!user);
       setLoading(false);
-      
+
       // Redirect to login if not authenticated and not on login page
-      if (!user && !window.location.pathname.includes('/login')) {
-        router.push('/login');
+      if (!user && !window.location.pathname.includes("/login")) {
+        router.push("/login");
       }
     });
 

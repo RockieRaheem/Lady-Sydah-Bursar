@@ -349,7 +349,7 @@ export async function initializeSchoolClasses(
 // AUDIT LOG
 // ============================================
 
-async function logAuditAction(
+export async function logAuditAction(
   action: "CREATE" | "UPDATE" | "DELETE",
   resource: "PUPIL" | "PAYMENT" | "EXPENSE",
   resourceId: string,
@@ -376,6 +376,16 @@ async function logAuditAction(
   } catch (error) {
     console.error("Error logging audit action:", error);
     // Don't throw error - audit log failure shouldn't break the main operation
+  }
+}
+
+// Helper function for addClass compatibility
+export async function addClass(schoolClass: SchoolClass): Promise<void> {
+  try {
+    await initializeSchoolClasses([schoolClass]);
+  } catch (error) {
+    console.error("Error adding class:", error);
+    throw new Error("Failed to add school class");
   }
 }
 

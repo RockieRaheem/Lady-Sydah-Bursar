@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 /**
  * Middleware for authentication
@@ -7,8 +7,8 @@ import type { NextRequest } from 'next/server';
  * This middleware provides basic protection but the real auth check happens client-side
  */
 export function middleware(request: NextRequest) {
-  const isLoginPage = request.nextUrl.pathname === '/login';
-  const isPublicPath = isLoginPage || request.nextUrl.pathname === '/';
+  const isLoginPage = request.nextUrl.pathname === "/login";
+  const isPublicPath = isLoginPage || request.nextUrl.pathname === "/";
 
   // Allow access to public paths
   if (isPublicPath) {
@@ -29,6 +29,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };
