@@ -38,8 +38,14 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { type Payment, pupils } from "@/lib/data";
-import { type EnrichedPayment } from "@/app/(dashboard)/payments/page";
+import { type Payment } from "@/lib/data";
+import { useGlobalState } from "@/lib/global-state";
+
+type EnrichedPayment = Payment & {
+  pupilName: string;
+  className: string;
+  classId: string;
+};
 
 const paymentTypes = ["Fees", "Lunch", "Uniform", "Other"] as const;
 
@@ -69,6 +75,7 @@ export function AddEditPaymentDialog({
   onSave,
   payment,
 }: AddEditPaymentDialogProps) {
+  const { pupils } = useGlobalState();
   const form = useForm<PaymentFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -105,6 +112,8 @@ export function AddEditPaymentDialog({
     const dataToSave = {
       ...data,
       date: data.date.toISOString().split("T")[0], // format to YYYY-MM-DD
+      receiptNumber: payment?.receiptNumber || "", // Will be generated in the parent component for new payments
+      receivedBy: payment?.receivedBy || "Bursar", // Default to Bursar
     };
     if (payment) {
       onSave({ ...payment, ...dataToSave });

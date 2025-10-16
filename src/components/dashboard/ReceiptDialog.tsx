@@ -89,6 +89,10 @@ export function ReceiptDialog({
                 {format(new Date(payment.date), "PPP")}
               </p>
             </div>
+            <div className="col-span-2">
+              <p className="text-xs text-muted-foreground">Generated On</p>
+              <p className="font-medium">{format(new Date(), "PPP 'at' p")}</p>
+            </div>
           </div>
 
           {/* Student Information */}
@@ -206,7 +210,7 @@ export function ReceiptDialog({
               <div className="border-t border-gray-400 pt-2 mt-12">
                 <p className="text-sm font-medium">Bursar Signature</p>
                 <p className="text-xs text-muted-foreground">
-                  {format(new Date(payment.date), "dd/MM/yyyy")}
+                  {format(new Date(), "dd/MM/yyyy")}
                 </p>
               </div>
             </div>
