@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { MoreHorizontal, Pencil, Trash2, Receipt } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Receipt, History } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -32,6 +32,7 @@ import { formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { type EnrichedPayment } from "@/app/(dashboard)/dashboard/payments/page";
 import { ReceiptDialog } from "./ReceiptDialog";
+import { StudentPaymentHistoryDialog } from "./StudentPaymentHistoryDialog";
 import { useGlobalState } from "@/lib/global-state";
 
 type PaymentsDataTableProps = {
@@ -45,13 +46,15 @@ export function PaymentsDataTable({
   onEdit,
   onDelete,
 }: PaymentsDataTableProps) {
-  const { pupils, schoolClasses } = useGlobalState();
+  const { pupils, schoolClasses, payments } = useGlobalState();
   const [deleteTarget, setDeleteTarget] =
     React.useState<EnrichedPayment | null>(null);
   const [receiptTarget, setReceiptTarget] =
     React.useState<EnrichedPayment | null>(null);
   const [showReceipt, setShowReceipt] = React.useState(false);
-
+  const [historyTarget, setHistoryTarget] =
+    React.useState<EnrichedPayment | null>(null);
+  const [showHistory, setShowHistory] = React.useState(false);
   const getBadgeVariant = (type: string) => {
     switch (type.toLowerCase()) {
       case "fees":
@@ -82,7 +85,14 @@ export function PaymentsDataTable({
           <TableBody>
             {data.length ? (
               data.map((payment) => (
-                <TableRow key={payment.id}>
+                <TableRow
+                  key={payment.id}
+                  className="cursor-pointer hover:bg-muted/70 transition-colors"
+                  onClick={() => {
+                    setHistoryTarget(payment);
+                    setShowHistory(true);
+                  }}
+                >
                   <TableCell className="font-medium">
                     {payment.pupilName}
                   </TableCell>
@@ -105,7 +115,11 @@ export function PaymentsDataTable({
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
+                        <Button
+                          variant="ghost"
+                          className="h-8 w-8 p-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <span className="sr-only">Open menu</span>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
@@ -119,6 +133,15 @@ export function PaymentsDataTable({
                         >
                           <Receipt className="mr-2 h-4 w-4" />
                           View Receipt
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setHistoryTarget(payment);
+                            setShowHistory(true);
+                          }}
+                        >
+                          <History className="mr-2 h-4 w-4" />
+                          Payment History
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => onEdit(payment)}>
@@ -191,6 +214,28 @@ export function PaymentsDataTable({
           schoolClass={
             schoolClasses.find((c) => c.id === receiptTarget.classId)!
           }
+        />
+      )}
+
+      {/* Student Payment History Dialog */}
+      {historyTarget && (
+        <StudentPaymentHistoryDialog
+          isOpen={showHistory}
+          onClose={() => {
+            setShowHistory(false);
+            setHistoryTarget(null);
+          }}
+          pupil={pupils.find((p) => p.id === historyTarget.pupilId)!}
+          schoolClass={
+            schoolClasses.find((c) => c.id === historyTarget.classId)!
+          }
+          payments={payments.filter((p) => p.pupilId === historyTarget.pupilId)}
+          onViewReceipt={(payment) => {
+            setHistoryTarget(null);
+            setShowHistory(false);
+            setReceiptTarget(payment as EnrichedPayment);
+            setShowReceipt(true);
+          }}
         />
       )}
     </>
