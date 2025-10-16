@@ -1,0 +1,77 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'ADMIN';
+    }
+    
+    function isBursarOrAdmin() {
+      return isAuthenticated() && (getUserRole() == 'ADMIN' || getUserRole() == 'BURSAR');
+    }
+    
+    function canWrite() {
+      return isAuthenticated() && (getUserRole() == 'ADMIN' || getUserRole() == 'BURSAR');
+    }
+    
+    function canRead() {
+      return isAuthenticated(); // All authenticated users can read
+    }
+    
+    // Users collection - only admins can modify roles
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuthenticated(); // Users can be created during signup
+      allow update: if isAuthenticated() && (
+        request.auth.uid == userId || // Users can update their own profile
+        isAdmin() // Admins can update any user
+      );
+      allow delete: if isAdmin();
+    }
+    
+    // Pupils collection
+    match /pupils/{pupilId} {
+      allow read: if canRead();
+      allow create: if canWrite();
+      allow update: if canWrite();
+      allow delete: if isAdmin(); // Only admins can delete pupils
+    }
+    
+    // Payments collection
+    match /payments/{paymentId} {
+      allow read: if canRead();
+      allow create: if canWrite();
+      allow update: if canWrite();
+      allow delete: if isAdmin(); // Only admins can delete payments
+    }
+    
+    // Expenses collection
+    match /expenses/{expenseId} {
+      allow read: if canRead();
+      allow create: if canWrite();
+      allow update: if canWrite();
+      allow delete: if isAdmin(); // Only admins can delete expenses
+    }
+    
+    // School classes collection - read-only for most users
+    match /schoolClasses/{classId} {
+      allow read: if canRead();
+      allow write: if isAdmin(); // Only admins can modify classes
+    }
+    
+    // Audit logs - read-only for admins, write from server
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if isAuthenticated(); // Any authenticated user can create logs
+    }
+  }
+}

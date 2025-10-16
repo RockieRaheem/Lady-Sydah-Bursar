@@ -3,25 +3,24 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+/**
+ * DEPRECATED: This file is being replaced with Firebase Authentication
+ * Keep for backward compatibility during migration
+ *
+ * TODO: Remove this file once Firebase Authentication is fully integrated
+ */
+
 export async function handleLogin(formData: FormData) {
   const email = formData.get("email");
   const password = formData.get("password");
 
-  // In a real app, you'd validate these against a database.
-  if (email === "bursar@ladysydah.com" && password === "password123") {
-    const cookieStore = await cookies();
-    cookieStore.set("auth_token", "user-is-logged-in", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24, // 1 day
-      path: "/",
-      sameSite: "lax",
-    });
-    redirect("/dashboard");
-  } else {
-    // Redirect back to login with an error message
-    redirect("/login?error=Invalid credentials");
-  }
+  // SECURITY WARNING: This is a temporary fallback solution
+  // Firebase Authentication should be used instead
+  // See: src/lib/firebase/auth.ts
+
+  // This will be replaced with Firebase authentication
+  // For now, it returns an error to force Firebase setup
+  redirect("/login?error=Please configure Firebase Authentication");
 }
 
 export async function handleLogout() {

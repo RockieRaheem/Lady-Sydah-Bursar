@@ -1,6 +1,6 @@
-// This file contains the initial static data for the application.
-// In a real-world scenario, this data would likely come from a database or API.
-// For the purpose of this prototype, it is hardcoded here.
+// This file contains type definitions and initial static data for the application.
+// In production, this data will be stored in Firebase Firestore.
+// The static data below is used for development and as seed data.
 
 export type SchoolClass = {
   id: string;
