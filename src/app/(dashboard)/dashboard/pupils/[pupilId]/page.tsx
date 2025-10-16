@@ -40,6 +40,7 @@ import { Badge } from "@/components/ui/badge";
 import { type EnrichedPayment } from "@/app/(dashboard)/dashboard/payments/page";
 import { ReceiptDialog } from "@/components/dashboard/ReceiptDialog";
 import { StudentReportDialog } from "@/components/dashboard/StudentReportDialog";
+import { PaymentHistoryCard } from "@/components/dashboard/PaymentHistoryCard";
 
 type EnrichedPupil = Pupil & {
   className: string;
@@ -272,40 +273,79 @@ export default function PupilDetailsPage({
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Payment History</CardTitle>
-          <CardDescription>
-            A complete record of all payments made by this pupil.
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Payment History</CardTitle>
+            <CardDescription>
+              Complete record of all {pupilPayments.length} payment{pupilPayments.length !== 1 ? 's' : ''} made by this pupil
+            </CardDescription>
+          </div>
+          {pupilPayments.length > 0 && (
+            <div className="text-right">
+              <p className="text-sm text-muted-foreground">Total Payments</p>
+              <p className="text-2xl font-bold text-green-600">
+                {formatCurrency(pupilPayments.reduce((sum, p) => sum + p.amount, 0))}
+              </p>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[100px]">Receipt #</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Type</TableHead>
+                  <TableHead>Method</TableHead>
+                  <TableHead>Notes</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-right w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {pupilPayments.length > 0 ? (
-                  pupilPayments.map((payment) => (
-                    <TableRow key={payment.id}>
+                  pupilPayments.map((payment, index) => (
+                    <TableRow key={payment.id} className="hover:bg-muted/50">
+                      <TableCell className="font-mono text-xs">
+                        {payment.receiptNumber}
+                      </TableCell>
                       <TableCell>
-                        {new Date(payment.date).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
+                        <div className="flex flex-col">
+                          <span className="font-medium">
+                            {new Date(payment.date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            Payment #{pupilPayments.length - index}
+                          </span>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Badge variant={getBadgeVariant(payment.type)}>
                           {payment.type}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right font-mono">
+                      <TableCell>
+                        <span className="text-sm">
+                          {payment.paymentMethod || "Cash"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="max-w-[200px]">
+                        {payment.notes ? (
+                          <span className="text-sm text-muted-foreground truncate block">
+                            {payment.notes}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic">
+                            No notes
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-mono font-medium">
                         {formatCurrency(payment.amount)}
                       </TableCell>
                       <TableCell className="text-right">
@@ -325,7 +365,7 @@ export default function PupilDetailsPage({
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={7} className="h-24 text-center">
                       No payments recorded for this pupil yet.
                     </TableCell>
                   </TableRow>
@@ -335,6 +375,17 @@ export default function PupilDetailsPage({
           </div>
         </CardContent>
       </Card>
+
+      {/* Enhanced Payment History with Full Details */}
+      <PaymentHistoryCard
+        payments={pupilPayments}
+        pupil={pupil}
+        schoolClass={getClassById(pupil.classId)!}
+        onViewReceipt={(payment) => {
+          setSelectedPayment(payment);
+          setShowReceipt(true);
+        }}
+      />
 
       {/* Receipt Dialog */}
       {selectedPayment && (
