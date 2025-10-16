@@ -1,28 +1,31 @@
-'use server';
+"use server";
 
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export async function handleLogin(formData: FormData) {
-  const email = formData.get('email');
-  const password = formData.get('password');
+  const email = formData.get("email");
+  const password = formData.get("password");
 
   // In a real app, you'd validate these against a database.
-  if (email === 'bursar@ladysydah.com' && password === 'password123') {
-    cookies().set('auth_token', 'user-is-logged-in', {
+  if (email === "bursar@ladysydah.com" && password === "password123") {
+    const cookieStore = await cookies();
+    cookieStore.set("auth_token", "user-is-logged-in", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 24, // 1 day
-      path: '/',
+      path: "/",
+      sameSite: "lax",
     });
-    redirect('/dashboard');
+    redirect("/dashboard");
   } else {
     // Redirect back to login with an error message
-    redirect('/login?error=Invalid credentials');
+    redirect("/login?error=Invalid credentials");
   }
 }
 
 export async function handleLogout() {
-  cookies().delete('auth_token');
-  redirect('/login');
+  const cookieStore = await cookies();
+  cookieStore.delete("auth_token");
+  redirect("/login");
 }
