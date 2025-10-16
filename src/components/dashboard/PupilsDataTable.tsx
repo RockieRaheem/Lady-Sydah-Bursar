@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { MoreHorizontal, Pencil, Trash2, Gift } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Gift, DollarSign } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -37,12 +37,14 @@ type PupilsDataTableProps = {
   data: Pupil[];
   onEdit: (pupil: Pupil) => void;
   onDelete: (pupilId: string) => void;
+  onMakePayment: (pupil: Pupil) => void;
 };
 
 export function PupilsDataTable({
   data,
   onEdit,
   onDelete,
+  onMakePayment,
 }: PupilsDataTableProps) {
   const [deleteTarget, setDeleteTarget] = React.useState<Pupil | null>(null);
 
@@ -72,6 +74,7 @@ export function PupilsDataTable({
               <TableHead className="text-right">Paid</TableHead>
               <TableHead className="text-right">Balance</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead className="text-center">Quick Action</TableHead>
               <TableHead className="w-[50px] text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -106,6 +109,23 @@ export function PupilsDataTable({
                     {formatCurrency(pupil.balance)}
                   </TableCell>
                   <TableCell>{getStatusBadge(pupil)}</TableCell>
+                  <TableCell className="text-center">
+                    {pupil.balance > 0 ? (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => onMakePayment(pupil)}
+                        className="gap-1"
+                      >
+                        <DollarSign className="h-3 w-3" />
+                        Make Payment
+                      </Button>
+                    ) : (
+                      <Badge variant="outline" className="text-green-600">
+                        Paid
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -133,7 +153,7 @@ export function PupilsDataTable({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
+                <TableCell colSpan={8} className="h-24 text-center">
                   No pupils found for this class.
                 </TableCell>
               </TableRow>
