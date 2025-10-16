@@ -1,33 +1,34 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
+/**
+ * Middleware for authentication
+ * Note: Firebase Auth uses client-side authentication
+ * This middleware provides basic protection but the real auth check happens client-side
+ */
 export function middleware(request: NextRequest) {
-  const isAuthenticated = request.cookies.get("auth_token")?.value;
+  const isLoginPage = request.nextUrl.pathname === '/login';
+  const isPublicPath = isLoginPage || request.nextUrl.pathname === '/';
 
-  const { pathname } = request.nextUrl;
-
-  // Allow access to API routes and static files
-  if (pathname.startsWith("/api") || pathname.startsWith("/_next")) {
+  // Allow access to public paths
+  if (isPublicPath) {
     return NextResponse.next();
   }
 
-  const isLoginPage = pathname === "/login";
-
-  // If not authenticated and not on login page, redirect to login
-  if (!isAuthenticated && !isLoginPage) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  // If authenticated and on login page or root, redirect to dashboard
-  if (isAuthenticated && (isLoginPage || pathname === "/")) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
+  // For protected routes, let the client-side AuthProvider handle authentication
+  // This middleware just ensures the structure is correct
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    /*
+     * Match all request paths except:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };

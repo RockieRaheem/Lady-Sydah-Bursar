@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper functions
+    // Helper functions for authentication and authorization
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -12,25 +12,38 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      return isAuthenticated() && getUserRole() == 'ADMIN';
+      return isAuthenticated() && getUserRole() == 'admin';
     }
     
     function isBursarOrAdmin() {
-      return isAuthenticated() && (getUserRole() == 'ADMIN' || getUserRole() == 'BURSAR');
+      return isAuthenticated() && (getUserRole() == 'admin' || getUserRole() == 'bursar');
     }
     
     function canWrite() {
-      return isAuthenticated() && (getUserRole() == 'ADMIN' || getUserRole() == 'BURSAR');
+      return isAuthenticated() && (getUserRole() == 'admin' || getUserRole() == 'bursar');
     }
     
     function canRead() {
       return isAuthenticated(); // All authenticated users can read
     }
     
+    // Validate required fields
+    function hasRequiredUserFields() {
+      return request.resource.data.keys().hasAll(['email', 'role', 'displayName', 'createdAt', 'updatedAt']);
+    }
+    
+    function hasRequiredPupilFields() {
+      return request.resource.data.keys().hasAll(['name', 'classId', 'admissionDate', 'guardianName', 'guardianContact']);
+    }
+    
+    function hasRequiredPaymentFields() {
+      return request.resource.data.keys().hasAll(['pupilId', 'amount', 'date', 'term', 'academicYear']);
+    }
+    
     // Users collection - only admins can modify roles
     match /users/{userId} {
       allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
-      allow create: if isAuthenticated(); // Users can be created during signup
+      allow create: if true; // Allow user creation during signup
       allow update: if isAuthenticated() && (
         request.auth.uid == userId || // Users can update their own profile
         isAdmin() // Admins can update any user
@@ -38,15 +51,23 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
-    // Pupils collection
-    match /pupils/{pupilId} {
+    // Classes collection
+    match /classes/{classId} {
       allow read: if canRead();
       allow create: if canWrite();
+      allow update: if canWrite();
+      allow delete: if isAdmin();
+    }
+    
+    // Pupils collection - secure student data
+    match /pupils/{pupilId} {
+      allow read: if canRead();
+      allow create: if canWrite() && hasRequiredPupilFields();
       allow update: if canWrite();
       allow delete: if isAdmin(); // Only admins can delete pupils
     }
     
-    // Payments collection
+    // Payments collection - financial data security
     match /payments/{paymentId} {
       allow read: if canRead();
       allow create: if canWrite();
