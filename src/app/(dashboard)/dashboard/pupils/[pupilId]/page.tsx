@@ -277,14 +277,17 @@ export default function PupilDetailsPage({
           <div>
             <CardTitle>Payment History</CardTitle>
             <CardDescription>
-              Complete record of all {pupilPayments.length} payment{pupilPayments.length !== 1 ? 's' : ''} made by this pupil
+              Complete record of all {pupilPayments.length} payment
+              {pupilPayments.length !== 1 ? "s" : ""} made by this pupil
             </CardDescription>
           </div>
           {pupilPayments.length > 0 && (
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Total Payments</p>
               <p className="text-2xl font-bold text-green-600">
-                {formatCurrency(pupilPayments.reduce((sum, p) => sum + p.amount, 0))}
+                {formatCurrency(
+                  pupilPayments.reduce((sum, p) => sum + p.amount, 0)
+                )}
               </p>
             </div>
           )}
@@ -300,7 +303,9 @@ export default function PupilDetailsPage({
                   <TableHead>Method</TableHead>
                   <TableHead>Notes</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className="text-right w-[100px]">Actions</TableHead>
+                  <TableHead className="text-right w-[100px]">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -313,11 +318,14 @@ export default function PupilDetailsPage({
                       <TableCell>
                         <div className="flex flex-col">
                           <span className="font-medium">
-                            {new Date(payment.date).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
+                            {new Date(payment.date).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              }
+                            )}
                           </span>
                           <span className="text-xs text-muted-foreground">
                             Payment #{pupilPayments.length - index}

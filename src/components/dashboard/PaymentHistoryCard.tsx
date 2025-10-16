@@ -1,13 +1,25 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Receipt, Download, Calendar, CreditCard, FileText } from 'lucide-react';
-import { type Payment, type Pupil, type SchoolClass } from '@/lib/data';
-import { formatCurrency } from '@/lib/utils';
-import { format } from 'date-fns';
+import * as React from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Receipt,
+  Download,
+  Calendar,
+  CreditCard,
+  FileText,
+} from "lucide-react";
+import { type Payment, type Pupil, type SchoolClass } from "@/lib/data";
+import { formatCurrency } from "@/lib/utils";
+import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -15,7 +27,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 
 type PaymentHistoryCardProps = {
   payments: Payment[];
@@ -30,7 +42,9 @@ export function PaymentHistoryCard({
   schoolClass,
   onViewReceipt,
 }: PaymentHistoryCardProps) {
-  const [expandedPaymentId, setExpandedPaymentId] = React.useState<string | null>(null);
+  const [expandedPaymentId, setExpandedPaymentId] = React.useState<
+    string | null
+  >(null);
 
   // Sort payments by date (most recent first)
   const sortedPayments = [...payments].sort(
@@ -40,9 +54,12 @@ export function PaymentHistoryCard({
   // Calculate running balance after each payment
   const paymentsWithBalance = sortedPayments.map((payment, index) => {
     const previousPayments = sortedPayments.slice(0, index);
-    const totalPaidBefore = previousPayments.reduce((sum, p) => sum + p.amount, 0);
+    const totalPaidBefore = previousPayments.reduce(
+      (sum, p) => sum + p.amount,
+      0
+    );
     const totalPaidAfter = totalPaidBefore + payment.amount;
-    
+
     return {
       ...payment,
       balanceBefore: pupil.balance + (pupil.totalPaid - totalPaidBefore),
@@ -53,20 +70,20 @@ export function PaymentHistoryCard({
 
   const getBadgeVariant = (type: string) => {
     switch (type.toLowerCase()) {
-      case 'fees':
-        return 'default';
-      case 'lunch':
-        return 'secondary';
-      case 'uniform':
-        return 'outline';
+      case "fees":
+        return "default";
+      case "lunch":
+        return "secondary";
+      case "uniform":
+        return "outline";
       default:
-        return 'destructive';
+        return "destructive";
     }
   };
 
   const totalPaid = payments.reduce((sum, payment) => sum + payment.amount, 0);
-  const feePayments = payments.filter(p => p.type === 'Fees');
-  const otherPayments = payments.filter(p => p.type !== 'Fees');
+  const feePayments = payments.filter((p) => p.type === "Fees");
+  const otherPayments = payments.filter((p) => p.type !== "Fees");
 
   return (
     <Card>
@@ -78,7 +95,8 @@ export function PaymentHistoryCard({
               Complete Payment History
             </CardTitle>
             <CardDescription>
-              Detailed record of all {payments.length} transaction{payments.length !== 1 ? 's' : ''} for {pupil.name}
+              Detailed record of all {payments.length} transaction
+              {payments.length !== 1 ? "s" : ""} for {pupil.name}
             </CardDescription>
           </div>
         </div>
@@ -149,19 +167,23 @@ export function PaymentHistoryCard({
                     <TableHead>Payment Method</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                     <TableHead className="text-right">Balance After</TableHead>
-                    <TableHead className="text-right w-[100px]">Actions</TableHead>
+                    <TableHead className="text-right w-[100px]">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paymentsWithBalance.map((payment) => (
                     <React.Fragment key={payment.id}>
-                      <TableRow 
+                      <TableRow
                         className={`cursor-pointer hover:bg-muted/50 transition-colors ${
-                          expandedPaymentId === payment.id ? 'bg-muted/30' : ''
+                          expandedPaymentId === payment.id ? "bg-muted/30" : ""
                         }`}
-                        onClick={() => setExpandedPaymentId(
-                          expandedPaymentId === payment.id ? null : payment.id
-                        )}
+                        onClick={() =>
+                          setExpandedPaymentId(
+                            expandedPaymentId === payment.id ? null : payment.id
+                          )
+                        }
                       >
                         <TableCell className="font-semibold text-primary">
                           #{payment.paymentNumber}
@@ -173,7 +195,7 @@ export function PaymentHistoryCard({
                           <div className="flex items-center gap-2">
                             <Calendar className="h-3 w-3 text-muted-foreground" />
                             <span className="font-medium">
-                              {format(new Date(payment.date), 'MMM dd, yyyy')}
+                              {format(new Date(payment.date), "MMM dd, yyyy")}
                             </span>
                           </div>
                         </TableCell>
@@ -186,7 +208,7 @@ export function PaymentHistoryCard({
                           <div className="flex items-center gap-2">
                             <CreditCard className="h-3 w-3 text-muted-foreground" />
                             <span className="text-sm">
-                              {payment.paymentMethod || 'Cash'}
+                              {payment.paymentMethod || "Cash"}
                             </span>
                           </div>
                         </TableCell>
@@ -196,9 +218,13 @@ export function PaymentHistoryCard({
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
-                          <span className={`font-mono font-medium ${
-                            payment.balanceAfter > 0 ? 'text-destructive' : 'text-green-600'
-                          }`}>
+                          <span
+                            className={`font-mono font-medium ${
+                              payment.balanceAfter > 0
+                                ? "text-destructive"
+                                : "text-green-600"
+                            }`}
+                          >
                             {formatCurrency(payment.balanceAfter)}
                           </span>
                         </TableCell>
@@ -222,48 +248,74 @@ export function PaymentHistoryCard({
                           <TableCell colSpan={8} className="py-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4">
                               <div className="space-y-2">
-                                <h4 className="font-semibold text-sm">Payment Details</h4>
+                                <h4 className="font-semibold text-sm">
+                                  Payment Details
+                                </h4>
                                 <div className="space-y-1 text-sm">
                                   <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Received By:</span>
-                                    <span className="font-medium">{payment.receivedBy || 'Bursar'}</span>
+                                    <span className="text-muted-foreground">
+                                      Received By:
+                                    </span>
+                                    <span className="font-medium">
+                                      {payment.receivedBy || "Bursar"}
+                                    </span>
                                   </div>
                                   <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Balance Before:</span>
-                                    <span className={`font-medium ${
-                                      payment.balanceBefore > 0 ? 'text-destructive' : 'text-green-600'
-                                    }`}>
+                                    <span className="text-muted-foreground">
+                                      Balance Before:
+                                    </span>
+                                    <span
+                                      className={`font-medium ${
+                                        payment.balanceBefore > 0
+                                          ? "text-destructive"
+                                          : "text-green-600"
+                                      }`}
+                                    >
                                       {formatCurrency(payment.balanceBefore)}
                                     </span>
                                   </div>
                                   <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Payment Made:</span>
+                                    <span className="text-muted-foreground">
+                                      Payment Made:
+                                    </span>
                                     <span className="font-medium text-green-600">
                                       -{formatCurrency(payment.amount)}
                                     </span>
                                   </div>
                                   <div className="flex justify-between pt-2 border-t">
-                                    <span className="text-muted-foreground font-semibold">Balance After:</span>
-                                    <span className={`font-bold ${
-                                      payment.balanceAfter > 0 ? 'text-destructive' : 'text-green-600'
-                                    }`}>
+                                    <span className="text-muted-foreground font-semibold">
+                                      Balance After:
+                                    </span>
+                                    <span
+                                      className={`font-bold ${
+                                        payment.balanceAfter > 0
+                                          ? "text-destructive"
+                                          : "text-green-600"
+                                      }`}
+                                    >
                                       {formatCurrency(payment.balanceAfter)}
                                     </span>
                                   </div>
                                 </div>
                               </div>
                               <div className="space-y-2">
-                                <h4 className="font-semibold text-sm">Additional Information</h4>
+                                <h4 className="font-semibold text-sm">
+                                  Additional Information
+                                </h4>
                                 <div className="space-y-1 text-sm">
                                   {payment.notes ? (
                                     <div>
-                                      <span className="text-muted-foreground">Notes:</span>
+                                      <span className="text-muted-foreground">
+                                        Notes:
+                                      </span>
                                       <p className="mt-1 p-2 bg-background rounded border">
                                         {payment.notes}
                                       </p>
                                     </div>
                                   ) : (
-                                    <p className="text-muted-foreground italic">No additional notes</p>
+                                    <p className="text-muted-foreground italic">
+                                      No additional notes
+                                    </p>
                                   )}
                                 </div>
                               </div>
