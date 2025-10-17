@@ -83,16 +83,16 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 p-4">
       <Card className="w-full max-w-md shadow-2xl border-0">
         <CardHeader className="text-center space-y-4 pb-6">
           <div className="flex justify-center">
-            <div className="rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 p-4 shadow-lg">
+            <div className="rounded-2xl bg-gradient-to-br from-green-600 to-emerald-600 p-4 shadow-lg">
               <School className="h-10 w-10 text-white" />
             </div>
           </div>
           <div>
-            <CardTitle className="font-headline text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <CardTitle className="font-headline text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
               Reset Password
             </CardTitle>
             <CardDescription className="text-base mt-2">
